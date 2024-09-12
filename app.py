@@ -4,10 +4,13 @@ import os
 
 from flask import Flask
 from flask_smorest import Api
+from flask_jwt_extended import JWTManager
+
 from exceptions import ApiErrorException
 from resources.items import blp as ItemsBlueprint
 from resources.stores import blp as StoresBlueprint
 from resources.tags import blp as TagsBlueprint
+from resources.users import blp as UsersBlueprint
 from db import db
 
 
@@ -35,12 +38,19 @@ def create_app(db_url=None):
 
     api = Api(app)
 
+    app.config["JWT_SECRET_KEY"] = os.getenv(
+        "JWT_SECRET_KEY",
+        "95088854782557170340987083085166124607"
+    )
+    jwt = JWTManager(app)
+
     with app.app_context():
         db.create_all()
 
     api.register_blueprint(ItemsBlueprint)
     api.register_blueprint(StoresBlueprint)
     api.register_blueprint(TagsBlueprint)
+    api.register_blueprint(UsersBlueprint)
 
     @app.errorhandler(ApiErrorException)
     def handle_api_error(err: ApiErrorException):

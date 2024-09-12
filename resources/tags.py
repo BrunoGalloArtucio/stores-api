@@ -10,7 +10,7 @@ from db import db
 blp = Blueprint("tags", __name__, description="Operation on tags")
 
 
-@blp.route('/stores/<string:store_id>/tags')
+@blp.route('/stores/<int:store_id>/tags')
 class Tags(MethodView):
     """Item method view"""
 
@@ -59,7 +59,7 @@ class Tags(MethodView):
             ) from SQLAlchemyError
 
 
-@blp.route('/tags/<string:tag_id>')
+@blp.route('/tags/<int:tag_id>')
 class Tag(MethodView):
     """Tag Method view"""
 
@@ -90,7 +90,7 @@ class Tag(MethodView):
         db.session.commit()
 
 
-@blp.route('/item/<string:item_id>/tags/<string:tag_id>')
+@blp.route('/item/<int:item_id>/tags/<int:tag_id>')
 class LinkTagsToItem(MethodView):
     """Link Tags To Item Method view"""
 

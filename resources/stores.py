@@ -45,7 +45,7 @@ class Stores(MethodView):
         return store
 
 
-@blp.route('/stores/<string:store_id>')
+@blp.route('/stores/<int:store_id>')
 class Store(MethodView):
     """Store method view"""
 

@@ -48,7 +48,7 @@ class Items(MethodView):
             ) from SQLAlchemyError
 
 
-@blp.route('/items/<string:item_id>')
+@blp.route('/items/<int:item_id>')
 class Item(MethodView):
     """Item method view"""
 
