@@ -1,0 +1,6 @@
+flask
+flask-smorest
+python-dotenv
+marshmallow==3.22.0
+sqlalchemy
+flask-sqlalchemy
