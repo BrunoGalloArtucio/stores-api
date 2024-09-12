@@ -2,6 +2,6 @@ services:
     store-api:
         build: . #  Targets Docker file in current directory
         ports:
-            - 5005:5000
+            - 5005:80
         volumes:
             - .:/app # Keep in sync current directory (.) to /app (Dockerfile's WORKDIR)

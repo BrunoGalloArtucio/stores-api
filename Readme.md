@@ -2,6 +2,13 @@
 
 -   `Flask` app configured in `app.py`
 
+# How to run locally
+
+Open Docker and run the following commands
+
+-   `docker compose build`
+-   `docker compose up`
+
 ### Authentication
 
 -   Routes protected with `@jwt_required()`
