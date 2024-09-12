@@ -8,6 +8,7 @@ class PlainItemSchema(Schema):
     # dump_only means it's only expected on the response bodies
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True, validate=validate.Length(min=3))
+    description = fields.Str()
     price = fields.Float(required=True, validate=validate.Range(min=0.01))
 
 
@@ -48,6 +49,7 @@ class TagSchema(PlainTagSchema):
 class ItemUpdateSchema(Schema):
     """Validation schema for item creation"""
     name = fields.Str(required=True, validate=validate.Length(min=3))
+    description = fields.Str()
     price = fields.Float(required=True, validate=validate.Range(min=0.01))
     store_id = fields.Int()
 

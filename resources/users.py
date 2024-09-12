@@ -11,6 +11,7 @@ from flask_jwt_extended import (
     create_refresh_token,
     get_jwt_identity
 )
+
 from exceptions import ApiErrorException
 from schemas import UserSchema
 from models import UserModel

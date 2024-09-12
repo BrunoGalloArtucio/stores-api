@@ -9,6 +9,7 @@ class ItemModel(db.Model):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
+    description = Column(String)
     price = Column(Float(precision=2), nullable=False)
     store_id = Column(Integer, ForeignKey("stores.id"), nullable=False)
     store = db.relationship("StoreModel", back_populates="items")
