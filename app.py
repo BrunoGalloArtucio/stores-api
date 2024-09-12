@@ -12,6 +12,7 @@ from resources.stores import blp as StoresBlueprint
 from resources.tags import blp as TagsBlueprint
 from resources.users import blp as UsersBlueprint
 from db import db
+from blocklist import BLOCKLIST
 
 
 def create_app(db_url=None):
@@ -43,6 +44,30 @@ def create_app(db_url=None):
         "95088854782557170340987083085166124607"
     )
     jwt = JWTManager(app)
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_in_blocklist(jwt_header, jwy_payload):
+        return jwy_payload["jti"] in BLOCKLIST
+
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        return (
+            jsonify({
+                "message": "The token has been revoked via log out",
+                "status": "Unauthorized"
+            }),
+            401
+        )
+
+    @jwt.needs_fresh_token_loader
+    def token_not_fresh_callback(jwt_header, jwy_payload):
+        return (
+            jsonify({
+                "message": "The token is not fresh",
+                "status": "Unauthorized"
+            }),
+            401
+        )
 
     @jwt.additional_claims_loader
     def add_claims_to_jwt(identity):
