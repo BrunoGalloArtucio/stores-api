@@ -3,11 +3,12 @@
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask.views import MethodView
 from flask_smorest import Blueprint
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required
 from exceptions import ApiErrorException
 from schemas import ItemSchema, ItemUpdateSchema
 from models import ItemModel
 from db import db
+from resources.decorators import admin_required
 
 blp = Blueprint("items", __name__, description="Operation on items")
 
@@ -22,20 +23,11 @@ class Items(MethodView):
         """GET items"""
         return ItemModel.query.all()
 
-    @jwt_required()
+    @admin_required
     @blp.arguments(ItemSchema)
     @blp.response(201, ItemSchema)
     def post(self, item_data):
         """POST items"""
-        jwt = get_jwt()
-        if not jwt.get("is_admin"):
-            raise ApiErrorException(
-                403,
-                "Forbidden",
-                "Admin privilege required",
-                {}
-            )
-
         item = ItemModel(**item_data)
 
         validate_item_name(item_data["name"], item_data["store_id"])
@@ -73,7 +65,7 @@ class Item(MethodView):
         item = ItemModel.query.get_or_404(item_id)
         return item
 
-    @jwt_required()
+    @admin_required
     @blp.arguments(ItemUpdateSchema)
     @blp.response(200, ItemSchema)
     def put(self, item_data, item_id):
@@ -106,7 +98,7 @@ class Item(MethodView):
                 {"item": item_data, "error": str(e)}
             ) from SQLAlchemyError
 
-    @jwt_required()
+    @admin_required
     @blp.response(204)
     def delete(self, item_id):
         """Delete item by id"""

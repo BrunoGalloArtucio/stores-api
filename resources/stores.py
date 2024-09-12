@@ -8,6 +8,7 @@ from exceptions import ApiErrorException
 from schemas import StoreSchema
 from models import StoreModel
 from db import db
+from resources.decorators import admin_required
 
 blp = Blueprint("stores", __name__, description="Operation on stores")
 
@@ -22,7 +23,7 @@ class Stores(MethodView):
         """GET stores"""
         return StoreModel.query.all()
 
-    @jwt_required()
+    @admin_required
     @blp.arguments(StoreSchema)
     @blp.response(201, StoreSchema)
     def post(self, store_data):
@@ -59,7 +60,7 @@ class Store(MethodView):
         store = StoreModel.query.get_or_404(store_id)
         return store
 
-    @jwt_required()
+    @admin_required
     @blp.response(204)
     def delete(self, store_id):
         """Delete store by id"""

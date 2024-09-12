@@ -7,6 +7,7 @@ from models import TagModel, StoreModel, ItemModel
 from schemas import PlainTagSchema, TagSchema
 from exceptions import ApiErrorException
 from db import db
+from resources.decorators import admin_required
 
 blp = Blueprint("tags", __name__, description="Operation on tags")
 
@@ -23,7 +24,7 @@ class Tags(MethodView):
 
         return store.tags.all()
 
-    @jwt_required()
+    @admin_required
     @blp.arguments(PlainTagSchema)
     @blp.response(200, TagSchema)
     def post(self, tag_data, store_id):
@@ -73,7 +74,7 @@ class Tag(MethodView):
         tag = TagModel.query.get_or_404(tag_id)
         return tag
 
-    @jwt_required()
+    @admin_required
     @blp.response(204, description="Deletes a tag if no item is tagged with it")
     @blp.alt_response(404, description="Tag not found")
     @blp.alt_response(
@@ -99,7 +100,7 @@ class Tag(MethodView):
 class LinkTagsToItem(MethodView):
     """Link Tags To Item Method view"""
 
-    @jwt_required()
+    @admin_required
     @blp.response(204)
     def post(self, item_id, tag_id):
         """Link item and tag"""
@@ -126,7 +127,7 @@ class LinkTagsToItem(MethodView):
                 {"item_id": item_id, "tag_id": tag_id, "error": str(e)}
             ) from SQLAlchemyError
 
-    @jwt_required()
+    @admin_required
     @blp.response(204)
     def delete(self, item_id, tag_id):
         """Remove tag from item"""
