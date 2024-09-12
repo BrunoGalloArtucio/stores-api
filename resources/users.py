@@ -4,6 +4,7 @@ from passlib.hash import pbkdf2_sha256
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask.views import MethodView
 from flask_smorest import Blueprint
+from flask_jwt_extended import create_access_token
 from exceptions import ApiErrorException
 from schemas import UserSchema
 from models import UserModel
@@ -13,7 +14,7 @@ blp = Blueprint("users", __name__, description="Operation on users")
 
 
 @blp.route('/register')
-class Users(MethodView):
+class Register(MethodView):
     """Users method view"""
 
     @blp.arguments(UserSchema)
@@ -45,6 +46,30 @@ class Users(MethodView):
                 "Could not create user",
                 {"user": user_data, "error": str(e)}
             ) from SQLAlchemyError
+
+
+@blp.route('/login')
+class UserLogIn(MethodView):
+    """Log in method view"""
+
+    @blp.arguments(UserSchema)
+    @blp.response(200)
+    def post(self, user_data):
+        """POST users"""
+        user = UserModel.query.filter(
+            UserModel.username == user_data["username"],
+        ).first()
+
+        if user and pbkdf2_sha256.verify(user_data["password"], user.password):
+            access_token = create_access_token(identity=user.id)
+            return {"access_token": access_token}
+
+        raise ApiErrorException(
+            403,
+            "Unauthorized",
+            "Invalid username/password combination",
+            {}
+        )
 
 
 @blp.route('/users/<int:user_id>')

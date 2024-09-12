@@ -3,6 +3,7 @@
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask.views import MethodView
 from flask_smorest import Blueprint
+from flask_jwt_extended import jwt_required, get_jwt
 from exceptions import ApiErrorException
 from schemas import ItemSchema, ItemUpdateSchema
 from models import ItemModel
@@ -15,15 +16,26 @@ blp = Blueprint("items", __name__, description="Operation on items")
 class Items(MethodView):
     """Items method view"""
 
+    @jwt_required()
     @blp.response(200, ItemSchema(many=True))
     def get(self):
         """GET items"""
         return ItemModel.query.all()
 
+    @jwt_required()
     @blp.arguments(ItemSchema)
     @blp.response(201, ItemSchema)
     def post(self, item_data):
         """POST items"""
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            raise ApiErrorException(
+                403,
+                "Forbidden",
+                "Admin privilege required",
+                {}
+            )
+
         item = ItemModel(**item_data)
 
         validate_item_name(item_data["name"], item_data["store_id"])
@@ -32,6 +44,7 @@ class Items(MethodView):
             db.session.add(item)
             db.session.commit()
             return item
+
         except IntegrityError as e:
             raise ApiErrorException(
                 422,
@@ -39,6 +52,7 @@ class Items(MethodView):
                 "Item name already in use",
                 {"item": item_data, "error": str(e)}
             ) from IntegrityError
+
         except SQLAlchemyError as e:
             raise ApiErrorException(
                 500,
@@ -52,12 +66,14 @@ class Items(MethodView):
 class Item(MethodView):
     """Item method view"""
 
+    @jwt_required()
     @blp.response(200, ItemSchema)
     def get(self, item_id):
         """Get item by id"""
         item = ItemModel.query.get_or_404(item_id)
         return item
 
+    @jwt_required()
     @blp.arguments(ItemUpdateSchema)
     @blp.response(200, ItemSchema)
     def put(self, item_data, item_id):
@@ -90,6 +106,7 @@ class Item(MethodView):
                 {"item": item_data, "error": str(e)}
             ) from SQLAlchemyError
 
+    @jwt_required()
     @blp.response(204)
     def delete(self, item_id):
         """Delete item by id"""
